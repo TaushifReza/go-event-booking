@@ -1,4 +1,4 @@
-module github.com/TaushifReza/event-booking-api
+module github.com/TaushifReza/go-event-booking-api
 
 go 1.25.1
 
