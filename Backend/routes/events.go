@@ -25,8 +25,8 @@ func createEvent(c *gin.Context) {
 	err := c.ShouldBindJSON(&event)
 
 	if err != nil {
-		fmt.Println(event)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
