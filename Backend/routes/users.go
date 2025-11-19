@@ -30,7 +30,8 @@ func signup(c *gin.Context){
 	err = user.Save()
 
 	if err != nil{
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong. Please try again."})
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong. Please try again.", "error": err.Error()})
 		return
 	}
 
