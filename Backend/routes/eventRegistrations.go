@@ -33,7 +33,7 @@ func eventRegister(c *gin.Context) {
 	err = models.RegisterForEvent(eventID, userId)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong. Please try again."})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong. Please try again.", "error": err.Error()})
 		return
 	}
 

@@ -18,7 +18,7 @@ func RegisterForEvent(eventID, userID int64) (error){
 	defer stmt.Close()
 	_, err = stmt.Exec(eventID, userID)
 	if err != nil{
-		return nil
+		return err
 	}
 	return err
 }
