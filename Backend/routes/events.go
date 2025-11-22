@@ -140,7 +140,7 @@ func deleteEvents(c *gin.Context){
 	}
 	fmt.Println("User ID: ", userId, "Event User ID: ", event.UserID)
 	if userId != event.UserID {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have privilege to edit this event."})
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have privilege to delete this event."})
 		return
 	}
 
