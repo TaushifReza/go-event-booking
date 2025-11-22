@@ -30,7 +30,9 @@ func createEvent(c *gin.Context) {
 		return
 	}
 
-	event.UserID = 1
+	id := c.GetInt64("id")
+
+	event.UserID = id
 	err = event.Save()
 
 	if err != nil {
@@ -70,7 +72,9 @@ func updateEvents(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid id format"})
 	}
 
-	_, err = models.GetEvent(id)
+	userId := c.GetInt64("id")
+
+	event, err := models.GetEvent(id)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -78,6 +82,12 @@ func updateEvents(c *gin.Context){
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	fmt.Println("User ID: ", userId, "Event User ID: ", event.UserID)
+	if userId != event.UserID {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have privilege to edit this event."})
 		return
 	}
 
@@ -116,6 +126,8 @@ func deleteEvents(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid id format"})
 	}
 
+	userId := c.GetInt64("id")
+
 	event , err := models.GetEvent(id)
 
 	if err != nil {
@@ -124,6 +136,11 @@ func deleteEvents(c *gin.Context){
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println("User ID: ", userId, "Event User ID: ", event.UserID)
+	if userId != event.UserID {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have privilege to edit this event."})
 		return
 	}
 
