@@ -43,15 +43,16 @@ This project was created with the core purpose of **learning Go backend developm
 
 ## Tech Stack
 
-| Layer            | Technology              |
-| ---------------- | ----------------------- |
-| Language         | **Go (Golang)**         |
-| Framework        | **Gin Web Framework**   |
-| Database         | **SQLite**              |
-| Auth             | **JWT (golang-jwt v5)** |
-| Password hashing | **bcrypt**              |
-| Live Reload      | **Air**                 |
-| Env config       | `godotenv`              |
+| S.N | Layer            | Technology              |
+| --- | ---------------- | ----------------------- |
+| 1.  | Language         | **Go (Golang)**         |
+| 2.  | Framework        | **Gin Web Framework**   |
+| 3.  | Database         | **SQLite**              |
+| 4.  | ORM              | **GORM**                |
+| 5.  | Auth             | **JWT (golang-jwt v5)** |
+| 6.  | Password hashing | **bcrypt**              |
+| 7.  | Live Reload      | **Air**                 |
+| 8.  | Env config       | **godotenv**            |
 
 ---
 
