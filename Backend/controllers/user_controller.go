@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/TaushifReza/go-event-booking-api/dto"
-	"github.com/TaushifReza/go-event-booking-api/logger"
+	"github.com/TaushifReza/go-event-booking-api/pkg/logger"
 	"github.com/TaushifReza/go-event-booking-api/services"
 	"github.com/TaushifReza/go-event-booking-api/utils"
 	"github.com/gin-gonic/gin"
@@ -63,6 +63,6 @@ func (c *UserController) Login(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Login failed.", err))
 		return
 	}
-	logger.Info("User login success")
+	logger.Log.Warn("User login success")
 	ctx.JSON(http.StatusOK, utils.SuccessResponse("Login success.", res))
 }
