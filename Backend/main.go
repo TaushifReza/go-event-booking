@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/TaushifReza/go-event-booking-api/db"
+	"github.com/TaushifReza/go-event-booking-api/logger"
 	"github.com/TaushifReza/go-event-booking-api/routes"
 	"github.com/TaushifReza/go-event-booking-api/utils"
 	"github.com/gin-gonic/gin"
@@ -11,6 +10,8 @@ import (
 )
 
 func main() {
+	logger.InitLogger()
+	
 	if err := godotenv.Load(".env"); err != nil{
         panic("No .env file found (using environment variables)")
     }
@@ -19,11 +20,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Successfully connect to database.")
+	logger.Info("Successfully connect to database.")
 
 	err = db.Migrate()
 
-	fmt.Println("Successfully migrate table to database.")
+	logger.Info("Successfully migrate table to database.")
 
 	if err != nil {
 		panic(err)
@@ -36,6 +37,7 @@ func main() {
 	// add routes
 	routes.UserRoutes(server, dbInstance)
 
+	logger.Info("Server running on port 8080")
 	err = server.Run(":8080")
 	if err != nil {
 		panic(err)
