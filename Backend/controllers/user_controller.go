@@ -49,3 +49,30 @@ func (c *UserController) Register(ctx *gin.Context){
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "User created successfully.", "data": res})
 }
+
+func (c *UserController) Login(ctx *gin.Context){
+	var req dto.LoginRequest
+	if err := ctx.ShouldBind(&req); err != nil{
+		validationErrors := utils.FormatValidationErrors(err)
+		if len(validationErrors) > 0{
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": validationErrors})
+			return
+		}
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+	}
+
+	res, err := c.UserService.GetUserByEmail(&req)
+	if err != nil{
+		validationErrors := utils.FormatValidationErrors(err)
+		if len(validationErrors) > 0{
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": validationErrors})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Login success.", "data": res})
+}

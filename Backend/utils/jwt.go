@@ -11,7 +11,7 @@ import (
 
 const secretKey = "secretKey"
 
-func GenerateToken(id int64, email string) (string, error) {
+func GenerateToken(id uint, email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": id,
 		"email": email,
@@ -21,7 +21,7 @@ func GenerateToken(id int64, email string) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func VerifyToken(token string) (int64, error){
+func VerifyToken(token string) (uint, error){
 	token = strings.TrimPrefix(token, "Bearer ")
 	
 	parseToken, err := jwt.Parse(token, func (token *jwt.Token) (interface{}, error){
@@ -52,7 +52,7 @@ func VerifyToken(token string) (int64, error){
 	}
 
 	// email := claims["email"].(string)
-	id := int64(claims["id"].(float64))
+	id := uint(claims["id"].(float64))
 
 	return id, nil
 }

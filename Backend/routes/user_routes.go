@@ -13,4 +13,5 @@ func UserRoutes(server *gin.Engine, db *gorm.DB){
 
 	auth := server.Group("/auth")
 	auth.POST("/register/", userController.Register)
+	auth.POST("/login/", userController.Login)
 }
