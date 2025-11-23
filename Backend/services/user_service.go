@@ -6,46 +6,52 @@ import (
 
 	"github.com/TaushifReza/go-event-booking-api/dto"
 	"github.com/TaushifReza/go-event-booking-api/models"
+	"github.com/TaushifReza/go-event-booking-api/repositories"
 	"github.com/TaushifReza/go-event-booking-api/utils"
-	"gorm.io/gorm"
 )
 
 type UserService struct {
-	DB *gorm.DB
+	Repo *repositories.UserRepository
 }
 
-func (s *UserService) Create(resDto *dto.CreateUserRequest) (*models.User, error){
-	hashedPassword, err := utils.HashPassword(resDto.Password)
+func NewUserService(repo *repositories.UserRepository) *UserService{
+	return &UserService{Repo: repo}
+}
+
+func (s *UserService) Register(reqDto *dto.CreateUserRequest) (*models.User, error){
+	hashedPassword, err := utils.HashPassword(reqDto.Password)
 	if err != nil {
 		fmt.Println("Password hashing ERROR: ", err)
 		return nil, errors.New("something went wrong. please try again")
 	}
 
-	user := models.User{
-		Email: resDto.Email,
+	// check if email already exists
+	exists, err := s.Repo.ExistsByEmail(reqDto.Email)
+	if err != nil {
+		return nil, errors.New("something went wrong. please try again")
+	}
+	if exists {
+		return nil, fmt.Errorf("email %v already exists", reqDto.Email)
+	}
+
+	user := &models.User{
+		Email: reqDto.Email,
 		Password: hashedPassword,
 	}
-
-	// check if email already exist
-	var existingUser models.User
-	if err := s.DB.Where("email = ?", resDto.Email).First(&existingUser).Error; err == nil{
-		return nil, fmt.Errorf("email %v already exists", resDto.Email)
-	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("something went wrong. please try again")
-	}
 	
-	if err := s.DB.Create(&user).Error; err != nil{
-		fmt.Println("User Creation error ERROR: ", err)
+	if err := s.Repo.Create(user); err != nil{
 		return nil, errors.New("something went wrong. please try again")
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginResponse, error) {
-	var user models.User
-
-	if err := s.DB.Where("email = ?", reqDto.Email).First(&user).Error; err != nil{
+	user, err := s.Repo.GetByEmail(reqDto.Email)
+	if err != nil {
+		return nil, errors.New("something went wrong. please try again")
+	}
+	if user == nil {
 		return nil, errors.New("invalid email or password")
 	}
 
@@ -60,15 +66,11 @@ func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginRespons
 		return nil, errors.New("something went wrong. please try again")
 	}
 
-	res := dto.UserLoginResponse{
+	res := &dto.UserLoginResponse{
 		ID: user.ID,
 		Email: user.Email,
 		Token: token,
 	}
 
-	return &res, nil
-}
-
-func NewUserService(db *gorm.DB) *UserService{
-	return &UserService{DB: db}
+	return res, nil
 }

@@ -2,13 +2,15 @@ package routes
 
 import (
 	"github.com/TaushifReza/go-event-booking-api/controllers"
+	"github.com/TaushifReza/go-event-booking-api/repositories"
 	"github.com/TaushifReza/go-event-booking-api/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 func UserRoutes(server *gin.Engine, db *gorm.DB){
-	userService := services.NewUserService(db)
+	repo := repositories.NewUserRepository(db)
+	userService := services.NewUserService(repo)
 	userController := controllers.NewUserController(userService)
 
 	auth := server.Group("/auth")

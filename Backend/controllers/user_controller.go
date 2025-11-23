@@ -19,7 +19,6 @@ func NewUserController(services *services.UserService) *UserController{
 
 func (c *UserController) Register(ctx *gin.Context){
 	var req dto.CreateUserRequest
-
 	if err := ctx.ShouldBindJSON(&req); err != nil{
 		validationErrors := utils.FormatValidationErrors(err)
 		if len(validationErrors) > 0 {
@@ -27,13 +26,13 @@ func (c *UserController) Register(ctx *gin.Context){
 			return
 		}
 	
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse("Invalid request body", err))
 		return
 	}
 
-	user, err := c.UserService.Create(&req)
+	user, err := c.UserService.Register(&req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Registration error.", err))
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Registration failed.", err))
 		return
 	}
 
