@@ -23,7 +23,7 @@ func (c *UserController) Register(ctx *gin.Context){
 	if err := ctx.ShouldBindJSON(&req); err != nil{
 		validationErrors := utils.FormatValidationErrors(err)
 		if len(validationErrors) > 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"errors": validationErrors})
+			ctx.JSON(http.StatusBadRequest, utils.ValidationErrorResponse(validationErrors))
 			return
 		}
 	
@@ -33,13 +33,8 @@ func (c *UserController) Register(ctx *gin.Context){
 
 	user, err := c.UserService.Create(&req)
 	if err != nil {
-		validationErrors := utils.FormatValidationErrors(err)
-		if len(validationErrors) > 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"errors": validationErrors})
-			return
-		}
-
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Registration error.", err))
+		return
 	}
 
 	res := dto.UserResponse{
@@ -47,7 +42,7 @@ func (c *UserController) Register(ctx *gin.Context){
 		Email: user.Email,
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "User created successfully.", "data": res})
+	ctx.JSON(http.StatusCreated, utils.SuccessResponse("User created successfully.", res))
 }
 
 func (c *UserController) Login(ctx *gin.Context){

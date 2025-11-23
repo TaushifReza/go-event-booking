@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/TaushifReza/go-event-booking-api/dto"
 	"github.com/TaushifReza/go-event-booking-api/models"
@@ -16,16 +17,26 @@ type UserService struct {
 func (s *UserService) Create(resDto *dto.CreateUserRequest) (*models.User, error){
 	hashedPassword, err := utils.HashPassword(resDto.Password)
 	if err != nil {
-		return nil, err
+		fmt.Println("Password hashing ERROR: ", err)
+		return nil, errors.New("something went wrong. please try again")
 	}
 
 	user := models.User{
 		Email: resDto.Email,
 		Password: hashedPassword,
 	}
+
+	// check if email already exist
+	var existingUser models.User
+	if err := s.DB.Where("email = ?", resDto.Email).First(&existingUser).Error; err == nil{
+		return nil, fmt.Errorf("email %v already exists", resDto.Email)
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("something went wrong. please try again")
+	}
 	
 	if err := s.DB.Create(&user).Error; err != nil{
-		return nil, err
+		fmt.Println("User Creation error ERROR: ", err)
+		return nil, errors.New("something went wrong. please try again")
 	}
 
 	return &user, nil
@@ -46,7 +57,7 @@ func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginRespons
 	// generate token
 	token, err := utils.GenerateToken(user.ID, user.Email)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("something went wrong. please try again")
 	}
 
 	res := dto.UserLoginResponse{
