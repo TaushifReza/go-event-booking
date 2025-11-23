@@ -52,27 +52,22 @@ func (c *UserController) Register(ctx *gin.Context){
 
 func (c *UserController) Login(ctx *gin.Context){
 	var req dto.LoginRequest
-	if err := ctx.ShouldBind(&req); err != nil{
+	if err := ctx.ShouldBindJSON(&req); err != nil{
 		validationErrors := utils.FormatValidationErrors(err)
 		if len(validationErrors) > 0{
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": validationErrors})
+			ctx.JSON(http.StatusBadRequest, utils.ValidationErrorResponse(validationErrors))
 			return
 		}
 
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
-	}
-
-	res, err := c.UserService.GetUserByEmail(&req)
-	if err != nil{
-		validationErrors := utils.FormatValidationErrors(err)
-		if len(validationErrors) > 0{
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": validationErrors})
-			return
-		}
-
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse("Invalid request body", err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Login success.", "data": res})
+	res, err := c.UserService.LoginUser(&req)
+	if err != nil{
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Login failed.", err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponse("Login success.", res))
 }

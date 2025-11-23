@@ -31,7 +31,7 @@ func (s *UserService) Create(resDto *dto.CreateUserRequest) (*models.User, error
 	return &user, nil
 }
 
-func (s *UserService) GetUserByEmail(reqDto *dto.LoginRequest) (*dto.UserLoginResponse, error) {
+func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginResponse, error) {
 	var user models.User
 
 	if err := s.DB.Where("email = ?", reqDto.Email).First(&user).Error; err != nil{
