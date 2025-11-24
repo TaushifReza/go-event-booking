@@ -10,50 +10,85 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secretKey = os.Getenv("JWT_SECRET")
+var (
+	accessSecret  = os.Getenv("JWT_ACCESS_SECRET")
+	refreshSecret = os.Getenv("JWT_REFRESH_SECRET")
+)
 
-func GenerateToken(id uint, email string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": id,
-		"email": email,
-		"exp": time.Now().Add(time.Hour * 2).Unix(),
-	})	
-
-	return token.SignedString([]byte(secretKey))
+type JWTClaims struct {
+	ID        uint   `json:"id"`
+	Email     string `json:"email"`
+	TokenType string `json:"token_type"` // access / refresh
+	jwt.RegisteredClaims
 }
 
-func VerifyToken(token string) (uint, error){
-	token = strings.TrimPrefix(token, "Bearer ")
-	
-	parseToken, err := jwt.Parse(token, func (token *jwt.Token) (interface{}, error){
-		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+func GenerateAccessToken(id uint, email string) (string, error) {
+	claims := &JWTClaims{
+		ID:        id,
+		Email:     email,
+		TokenType: "access",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "go-event-api",
+			Audience:  []string{"go-event-client"},
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+		},
+	}
 
-		if !ok{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(accessSecret))
+}
+
+func GenerateRefreshToken(id uint, email string) (string, error) {
+	claims := &JWTClaims{
+		ID:        id,
+		Email:     email,
+		TokenType: "refresh",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    "go-event-api",
+			Audience:  []string{"go-event-client"},
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)), // 30 days
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(refreshSecret))
+}
+
+func VerifyToken(tokenStr, tokenType string) (*JWTClaims, error) {
+	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+
+	var secret []byte
+	if tokenType == "access" {
+		secret = []byte(accessSecret)
+	} else {
+		secret = []byte(refreshSecret)
+	}
+
+	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-
-		return []byte(secretKey), nil
+		return secret, nil
 	})
 
 	if err != nil {
-		fmt.Println("PARSE ERROR: ",err)
-		return 0, errors.New("could not parse token")
+		fmt.Println("TOKEN PARSE ERROR:", err)
+		return nil, errors.New("could not parse token")
 	}
 
-	tokenIsValid := parseToken.Valid
-	
-	if !tokenIsValid {
-		return 0,errors.New("invalid token")
+	claims, ok := token.Claims.(*JWTClaims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
-	claims, ok := parseToken.Claims.(jwt.MapClaims)
-
-	if !ok {
-		return 0, errors.New("invalid token claims")
+	// Optional: enforce type
+	if claims.TokenType != tokenType {
+		return nil, errors.New("token type mismatch")
 	}
 
-	// email := claims["email"].(string)
-	id := uint(claims["id"].(float64))
-
-	return id, nil
+	return claims, nil
 }

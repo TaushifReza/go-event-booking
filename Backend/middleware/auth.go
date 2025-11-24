@@ -1,29 +1,24 @@
 package middleware
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/TaushifReza/go-event-booking-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func Authentication(c *gin.Context){
-	token := c.Request.Header.Get("Authorization")
+func AuthMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        token := c.GetHeader("Authorization")
 
-	if token == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Authorization token required"})
-		return
-	}
+        claims, err := utils.VerifyToken(token, "access")
+        if err != nil {
+            c.JSON(401, gin.H{"error": "unauthorized"})
+            c.Abort()
+            return
+        }
 
-	id, err := utils.VerifyToken(token)
+        c.Set("user_id", claims.ID)
+        c.Set("email", claims.Email)
 
-	if err != nil {
-		fmt.Println("ERROR: ", err)
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid token."})
-		return
-	}
-
-	c.Set("id", id)
-	c.Next()
+        c.Next()
+    }
 }

@@ -61,15 +61,14 @@ func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginRespons
 	}
 
 	// generate token
-	token, err := utils.GenerateToken(user.ID, user.Email)
-	if err != nil {
-		return nil, errors.New("something went wrong. please try again")
-	}
+	accessToken, _ := utils.GenerateAccessToken(user.ID, user.Email)
+	refreshToken, _ := utils.GenerateRefreshToken(user.ID, user.Email)
 
 	res := &dto.UserLoginResponse{
 		ID: user.ID,
 		Email: user.Email,
-		Token: token,
+		AccessToken: accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	return res, nil
