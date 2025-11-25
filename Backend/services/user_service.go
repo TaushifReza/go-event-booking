@@ -72,6 +72,21 @@ func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginRespons
 	return res, nil
 }
 
+func (s *UserService) VerifyRefreshToken(token string) (*dto.RefreshTokenResponse, error) {
+	claims, err := utils.VerifyToken(token, "refresh")
+	if err != nil {
+		return nil, err
+	}
+
+	// generate token
+	accessToken, _ := utils.GenerateAccessToken(claims.ID, claims.Email)
+
+	return &dto.RefreshTokenResponse{
+		AccessToken: accessToken,
+	}, nil
+}
+
+
 func (s *UserService) GetUserInfo(email string) (*dto.UserResponse, error){
 	user, err := s.Repo.GetByEmail(email)
 	if err != nil {

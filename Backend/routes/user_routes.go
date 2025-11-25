@@ -18,6 +18,7 @@ func UserRoutes(server *gin.Engine, db *gorm.DB){
 	{
 		auth.POST("/register/", userController.Register)
 		auth.POST("/login/", userController.Login)
+		auth.POST("/refresh/", userController.RefreshToken)
 	}
 
 	api := server.Group("/api")

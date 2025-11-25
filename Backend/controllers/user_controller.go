@@ -77,3 +77,24 @@ func (c *UserController) GetUserInfo(ctx *gin.Context){
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse("User data fetch successfully", res))
 }
+
+func (c *UserController) RefreshToken(ctx *gin.Context) {
+	var req dto.RefreshTokenRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.FormatValidationErrors(err)
+		if len(validationErrors) > 0{
+			ctx.JSON(http.StatusBadRequest, utils.ValidationErrorResponse(validationErrors))
+			return
+		}
+
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse("Invalid request body", err))
+		return
+	}
+
+	res, err := c.UserService.VerifyRefreshToken(req.RefreshToken)
+	if err != nil{
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to generate new access token.", err))
+		return
+	}
+	ctx.JSON(http.StatusOK, utils.SuccessResponse("Successfully generate new access token.", res))
+}
