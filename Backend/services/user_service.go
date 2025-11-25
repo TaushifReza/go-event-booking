@@ -65,10 +65,25 @@ func (s *UserService) LoginUser(reqDto *dto.LoginRequest) (*dto.UserLoginRespons
 	refreshToken, _ := utils.GenerateRefreshToken(user.ID, user.Email)
 
 	res := &dto.UserLoginResponse{
-		ID: user.ID,
-		Email: user.Email,
 		AccessToken: accessToken,
 		RefreshToken: refreshToken,
+	}
+
+	return res, nil
+}
+
+func (s *UserService) GetUserInfo(email string) (*dto.UserResponse, error){
+	user, err := s.Repo.GetByEmail(email)
+	if err != nil {
+		return nil, errors.New("something went wrong. please try again")
+	}
+	if user == nil {
+		return nil, errors.New("something went wrong. please try again")
+	}
+
+	res := &dto.UserResponse{
+		ID: user.ID,
+		Email: user.Email,
 	}
 
 	return res, nil

@@ -66,3 +66,14 @@ func (c *UserController) Login(ctx *gin.Context){
 	logger.Log.Warn("User login success")
 	ctx.JSON(http.StatusOK, utils.SuccessResponse("Login success.", res))
 }
+
+func (c *UserController) GetUserInfo(ctx *gin.Context){
+	email := ctx.GetString("email")
+
+	res , err := c.UserService.GetUserInfo(email)
+	if err != nil{
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to get user data.", err))
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponse("User data fetch successfully", res))
+}
