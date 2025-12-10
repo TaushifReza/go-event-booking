@@ -15,23 +15,12 @@ function PageNav() {
             <ul className="flex items-center gap-16">
                 <li>
                     <NavLink
-                        to="/pricing"
+                        to="/dashboard"
                         className={({ isActive }) =>
                             isActive ? `${baseLink} ${activeLink}` : baseLink
                         }
                     >
-                        Pricing
-                    </NavLink>
-                </li>
-
-                <li>
-                    <NavLink
-                        to="/product"
-                        className={({ isActive }) =>
-                            isActive ? `${baseLink} ${activeLink}` : baseLink
-                        }
-                    >
-                        Product
+                        Dashboard
                     </NavLink>
                 </li>
 
