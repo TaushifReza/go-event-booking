@@ -11,24 +11,22 @@ import (
 
 func main() {
 	logger.InitLogger()
-	
-	if err := godotenv.Load(".env"); err != nil{
-        panic("No .env file found (using environment variables)")
-    }
-	
+
+	if err := godotenv.Load(".env"); err != nil {
+		panic("No .env file found (using environment variables)")
+	}
+
 	dbInstance, err := db.InitDB()
 	if err != nil {
 		panic(err)
 	}
 	logger.Log.Info("Successfully connect to database.")
 
-	err = db.Migrate()
-
-	logger.Log.Info("Successfully migrate table to database.")
-
-	if err != nil {
+	if err := db.Migrate(); err != nil {
 		panic(err)
 	}
+
+	logger.Log.Info("Successfully migrate table to database.")
 
 	server := gin.Default()
 

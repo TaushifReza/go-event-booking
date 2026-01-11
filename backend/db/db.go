@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/TaushifReza/go-event-booking-api/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
-func InitDB() (*gorm.DB, error){
+func InitDB() (*gorm.DB, error) {
 	var err error
 	DB, err = gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{})
 	if err != nil {
@@ -27,11 +26,7 @@ func InitDB() (*gorm.DB, error){
 	sqlDB.SetMaxOpenConns(10)
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetConnMaxIdleTime(10 * time.Minute)
-    sqlDB.SetConnMaxLifetime(1 * time.Hour)
+	sqlDB.SetConnMaxLifetime(1 * time.Hour)
 
 	return DB, nil
-}
-
-func Migrate() error{
-	return DB.AutoMigrate(&models.User{})
 }
