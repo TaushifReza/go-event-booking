@@ -52,18 +52,26 @@ func (e *EventController) Create(ctx *gin.Context) {
 }
 
 func (e *EventController) GetAll(ctx *gin.Context) {
+	var query dto.PaginationQueryDto
+	if err := ctx.ShouldBindQuery(&query); err != nil {
+		validationError := utils.FormatValidationErrors(err)
+		if len(validationError) > 0 {
+			ctx.JSON(http.StatusBadRequest, utils.ValidationErrorResponse(validationError))
+			return
+		}
+
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse("Invalid request body", err))
+		return
+	}
+
+	query.Normalize()
+
 	c := ctx.Request.Context()
-	events, err := e.EventService.GetAll(c)
+	result, err := e.EventService.GetAll(c, query.Page, query.Limit)
 
 	if err != nil {
 		errors.HandleError(ctx, "Error fetching events.", err)
 		return
-	}
-
-	result := make([]dto.EventDetailResponseDto, 0, len(events))
-
-	for _, event := range events {
-		result = append(result, dto.EventDetailResponseDto{ID: event.ID, Name: event.Name, Description: event.Description, Location: event.Location, Venue: event.Venue, DateTime: event.DateTime})
 	}
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse("List of events.", result))

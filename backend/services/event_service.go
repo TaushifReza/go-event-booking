@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 
 	"github.com/TaushifReza/go-event-booking-api/dto"
@@ -38,8 +39,8 @@ func (e *EventService) Create(ctx context.Context, reqDto *dto.EventCreateDto, u
 	return event, nil
 }
 
-func (e *EventService) GetAll(ctx context.Context) ([]models.Event, error) {
-	events, err := e.Repo.GetAll(ctx)
+func (e *EventService) GetAll(ctx context.Context, page, limit int) (*dto.PaginatedResponse[models.Event], error) {
+	events, total, err := e.Repo.GetAll(ctx, page, limit)
 
 	if err != nil {
 		return nil, &common.AppError{
@@ -48,5 +49,13 @@ func (e *EventService) GetAll(ctx context.Context) ([]models.Event, error) {
 		}
 	}
 
-	return events, nil
+	totalPages := int(math.Ceil(float64(total) / float64(limit)))
+
+	return &dto.PaginatedResponse[models.Event]{
+		Data:       events,
+		Page:       page,
+		Limit:      limit,
+		Total:      total,
+		TotalPages: totalPages,
+	}, nil
 }

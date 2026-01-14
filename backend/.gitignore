@@ -29,6 +29,7 @@ go.work.sum
 
 *.db
 *.log
+tmp/
 
 # Editor/IDE
 # .idea/

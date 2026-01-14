@@ -21,10 +21,32 @@ func (r *EventRepository) Create(ctx context.Context, event *models.Event) error
 }
 
 // Get all
-func (r *EventRepository) GetAll(ctx context.Context) ([]models.Event, error) {
-	var events []models.Event
+func (r *EventRepository) GetAll(ctx context.Context, page, limit int) ([]models.Event, int64, error) {
+	var (
+		events []models.Event
+		total  int64
+		offset = (page - 1) * limit
+	)
 
-	err := r.DB.WithContext(ctx).Find(&events).Error
+	// count first
+	if err := r.DB.
+		WithContext(ctx).
+		Model(&models.Event{}).
+		Count(&total).
+		Error; err != nil {
+		return nil, 0, err
+	}
 
-	return events, err
+	// fetch page
+	if err := r.DB.
+		WithContext(ctx).
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&events).
+		Error; err != nil {
+		return nil, 0, err
+	}
+
+	return events, total, nil
 }
