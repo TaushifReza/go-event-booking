@@ -22,6 +22,7 @@ func (r *EventRepository) Create(ctx context.Context, event *models.Event) error
 
 // Get all
 func (r *EventRepository) GetAll(ctx context.Context, page, limit int) ([]models.Event, int64, error) {
+	// declare variable
 	var (
 		events []models.Event
 		total  int64
