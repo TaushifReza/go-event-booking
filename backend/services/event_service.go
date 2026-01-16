@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/TaushifReza/go-event-booking-api/internal/common"
 	"github.com/TaushifReza/go-event-booking-api/models"
 	"github.com/TaushifReza/go-event-booking-api/repositories"
+	"gorm.io/gorm"
 )
 
 type EventService struct {
@@ -57,5 +59,32 @@ func (e *EventService) GetAll(ctx context.Context, page, limit int) (*dto.Pagina
 		Limit:      limit,
 		Total:      total,
 		TotalPages: totalPages,
+	}, nil
+}
+
+func (e *EventService) GetByID(ctx context.Context, eventID uint) (*dto.EventDetailResponseDto, error) {
+	event, err := e.Repo.GetByID(ctx, eventID)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, &common.AppError{
+				Code:    http.StatusNotFound,
+				Message: fmt.Errorf("event not found"),
+			}
+		}
+
+		return nil, &common.AppError{
+			Code:    http.StatusInternalServerError,
+			Message: fmt.Errorf("something went wrong. please try again."),
+		}
+	}
+
+	return &dto.EventDetailResponseDto{
+		ID:          event.ID,
+		Name:        event.Name,
+		Description: event.Description,
+		Location:    event.Location,
+		Venue:       event.Venue,
+		DateTime:    event.DateTime,
 	}, nil
 }

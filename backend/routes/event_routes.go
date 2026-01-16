@@ -15,9 +15,15 @@ func EventRoutes(server *gin.Engine, db *gorm.DB) {
 	eventController := controllers.NewEventController(eventService)
 
 	api := server.Group("/api")
-	api.Use(middleware.AuthMiddleware())
+
+	public := api.Group("/events")
 	{
-		api.POST("/events/", eventController.Create)
-		api.GET("/events/", eventController.GetAll)
+		public.GET("/", eventController.GetAll)
+		public.GET("/:eventID/", eventController.GetByID)
+	}
+
+	protected := api.Group("/events").Use(middleware.AuthMiddleware())
+	{
+		protected.POST("/", eventController.Create)
 	}
 }

@@ -51,3 +51,14 @@ func (r *EventRepository) GetAll(ctx context.Context, page, limit int) ([]models
 
 	return events, total, nil
 }
+
+// get by id
+func (r *EventRepository) GetByID(ctx context.Context, eventID uint) (*models.Event, error) {
+	var event models.Event
+
+	if err := r.DB.WithContext(ctx).First(&event, eventID).Error; err != nil {
+		return nil, err
+	}
+
+	return &event, nil
+}

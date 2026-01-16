@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/TaushifReza/go-event-booking-api/dto"
 	"github.com/TaushifReza/go-event-booking-api/internal/http/errors"
@@ -75,4 +77,24 @@ func (e *EventController) GetAll(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.SuccessResponse("List of events.", result))
+}
+
+func (e *EventController) GetByID(ctx *gin.Context) {
+	eventID, err := strconv.ParseUint(ctx.Param("eventID"), 10, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse("invalid id", err))
+		return
+	}
+
+	c := ctx.Request.Context()
+
+	result, err := e.EventService.GetByID(c, uint(eventID))
+
+	if err != nil {
+		errors.HandleError(ctx, "Error retriving event", err)
+		return
+	}
+	fmt.Println("RESULT")
+	ctx.JSON(http.StatusOK, utils.SuccessResponse("Successfuly retrived event", result))
 }
