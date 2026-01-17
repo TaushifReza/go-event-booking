@@ -35,6 +35,7 @@ func main() {
 	// add routes
 	routes.UserRoutes(server, dbInstance)
 	routes.EventRoutes(server, dbInstance)
+	routes.EventRegistrationRoutes(server, dbInstance)
 
 	logger.Log.Info("Server running on port 8080")
 	err = server.Run(":8080")
