@@ -88,3 +88,28 @@ func (e *EventService) GetByID(ctx context.Context, eventID uint) (*dto.EventDet
 		DateTime:    event.DateTime,
 	}, nil
 }
+
+func (e *EventService) Update(ctx context.Context, id, userID uint, dto *dto.EventUpdateDto) error {
+	if !dto.HasUpdates() {
+		return &common.AppError{
+			Code:    http.StatusBadRequest,
+			Message: errors.New("no fields provided to update"),
+		}
+	}
+
+	if err := e.Repo.Update(ctx, id, userID, dto); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &common.AppError{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Errorf("event with id: %v not found", id),
+			}
+		}
+
+		return &common.AppError{
+			Code:    http.StatusInternalServerError,
+			Message: fmt.Errorf("something went wrong. please try again later"),
+		}
+	}
+
+	return nil
+}

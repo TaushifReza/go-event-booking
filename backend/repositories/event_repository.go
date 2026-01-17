@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 
+	"github.com/TaushifReza/go-event-booking-api/dto"
 	"github.com/TaushifReza/go-event-booking-api/models"
 	"gorm.io/gorm"
 )
@@ -61,4 +62,19 @@ func (r *EventRepository) GetByID(ctx context.Context, eventID uint) (*models.Ev
 	}
 
 	return &event, nil
+}
+
+// update
+func (r *EventRepository) Update(ctx context.Context, id, userID uint, dto *dto.EventUpdateDto) error {
+	result := r.DB.WithContext(ctx).Model(&models.Event{}).Where("id = ? AND user_id = ?", id, userID).Updates(dto)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }

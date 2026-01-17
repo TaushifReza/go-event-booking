@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -95,6 +94,34 @@ func (e *EventController) GetByID(ctx *gin.Context) {
 		errors.HandleError(ctx, "Error retriving event", err)
 		return
 	}
-	fmt.Println("RESULT")
+
 	ctx.JSON(http.StatusOK, utils.SuccessResponse("Successfuly retrived event", result))
+}
+
+func (e *EventController) Update(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse("invalid id", err))
+		return
+	}
+
+	var req dto.EventUpdateDto
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		validationError := utils.FormatValidationErrors(err)
+		if len(validationError) > 0 {
+			ctx.JSON(http.StatusBadRequest, utils.ValidationErrorResponse(validationError))
+			return
+		}
+	}
+
+	c := ctx.Request.Context()
+	userID := ctx.GetUint("user_id")
+
+	if err := e.EventService.Update(c, uint(id), userID, &req); err != nil {
+		errors.HandleError(ctx, "error updating event", err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.SuccessResponse("Event updated success", req))
 }

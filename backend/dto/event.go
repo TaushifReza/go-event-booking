@@ -18,3 +18,19 @@ type EventDetailResponseDto struct {
 	Venue       string    `json:"venue"`
 	DateTime    time.Time `json:"date_time"`
 }
+
+type EventUpdateDto struct {
+	Name        *string    `json:"name"`
+	Description *string    `json:"description"`
+	Location    *string    `json:"location"`
+	Venue       *string    `json:"venue"`
+	DateTime    *time.Time `json:"date_time"`
+}
+
+func (dto *EventUpdateDto) HasUpdates() bool {
+	return dto.Name != nil ||
+		dto.Description != nil ||
+		dto.Location != nil ||
+		dto.Venue != nil ||
+		dto.DateTime != nil
+}
