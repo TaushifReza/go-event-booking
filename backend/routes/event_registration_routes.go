@@ -1,12 +1,13 @@
 package routes
 
 import (
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
 	"github.com/TaushifReza/go-event-booking-api/controllers"
 	"github.com/TaushifReza/go-event-booking-api/middleware"
 	"github.com/TaushifReza/go-event-booking-api/repositories"
 	"github.com/TaushifReza/go-event-booking-api/services"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func EventRegistrationRoutes(server *gin.Engine, db *gorm.DB) {
